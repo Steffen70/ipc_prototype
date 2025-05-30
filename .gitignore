@@ -1,6 +1,7 @@
 # Ignore IDE files
 .vscode/
 .idea/
+*.user
 
 # Ignore build artifacts
 bin/

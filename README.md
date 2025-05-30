@@ -40,15 +40,17 @@ sudo apt install mono-devel
 ```bash
 cd DemoServer
 dotnet run
-# Output: Hello from DemoServer
+# Received: Hello from DemoLibrary
 ```
 
 ### .NET Framework (Mono) Project
 
+**Note:** You don't need to run the Mono service seperatly, the `DemoServer` will automatically start `DemoLibrary` when it starts.
+
 ```bash
 cd DemoLibrary
 msbuild > /dev/null 2>&1 && mono ./bin/Debug/SwissPension.IpcPrototype.Library.exe
-# Output: Hello from DemoLibrary
+# Waiting for IPC client...
 ```
 
 ## Notes

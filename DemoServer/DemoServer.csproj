@@ -13,4 +13,12 @@
         <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
     </Target>
 
+    <Target Name="BuildDemoLibrary" AfterTargets="Build">
+        <Exec Command='pwsh -NoProfile -File "$(MSBuildProjectDirectory)/BuildLibrary.ps1" -Configuration $(Configuration)'/>
+    </Target>
+
+    <Target Name="CopyDemoLibraryExecutable" AfterTargets="Build">
+        <Copy SourceFiles="$(MSBuildProjectDirectory)/../DemoLibrary/bin/$(Configuration)/SwissPension.IpcPrototype.Library.exe" DestinationFolder="$(OutputPath)"/>
+    </Target>
+
 </Project>

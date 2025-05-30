@@ -6,16 +6,29 @@
         <RootNamespace>$(AssemblyName)</RootNamespace>
         <TargetFramework>net48</TargetFramework>
         <OutputType>Exe</OutputType>
-        <AdditionalOptions>--langversion:latest</AdditionalOptions>
+        <LangVersion>8.0</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="Mono.Posix"/>
+    </ItemGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <OutputPath>bin\Debug\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <OutputPath>bin\Release\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="Program.cs"/>
+        <Compile Include="IpcServer.cs" />
     </ItemGroup>
 
     <Target Name="ForceClean" AfterTargets="Clean">
         <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
     </Target>
 
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>
