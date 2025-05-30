@@ -9,11 +9,14 @@ Write-Host "Building $projectPath ($Configuration)..."
 # Clear MSBuildExtensionsPath to avoid .NET SDK conflicts with Mono
 $env:MSBuildExtensionsPath = $null
 
+# Determine null device based on OS
+$nullDevice = if ($IsWindows) { 'NUL' } else { '/dev/null' }
+
 # Synchronously run msbuild and suppress output
 $processInfo = @{
     FilePath               = "msbuild"
     ArgumentList           = $projectPath, "/t:Rebuild /p:Configuration=$Configuration"
-    RedirectStandardOutput = "/dev/null"
+    RedirectStandardOutput = $nullDevice
     PassThru               = $true
     NoNewWindow            = $true
 }

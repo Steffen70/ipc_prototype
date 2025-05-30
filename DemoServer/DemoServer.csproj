@@ -9,6 +9,10 @@
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
+        <DefineConstants>$(DefineConstants);UNIX_IPC</DefineConstants>
+    </PropertyGroup>
+
     <Target Name="ForceClean" AfterTargets="Clean">
         <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
     </Target>

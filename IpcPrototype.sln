@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoLibrary", "DemoLibrary\DemoLibrary.csproj", "{E718E6A2-DC22-4D4E-B4C6-FF4BD6F806C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoServer", "DemoServer\DemoServer.csproj", "{AE1FBAC7-CE06-4867-ABB3-12EB095C488E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E718E6A2-DC22-4D4E-B4C6-FF4BD6F806C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E718E6A2-DC22-4D4E-B4C6-FF4BD6F806C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E718E6A2-DC22-4D4E-B4C6-FF4BD6F806C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E718E6A2-DC22-4D4E-B4C6-FF4BD6F806C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE1FBAC7-CE06-4867-ABB3-12EB095C488E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE1FBAC7-CE06-4867-ABB3-12EB095C488E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE1FBAC7-CE06-4867-ABB3-12EB095C488E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE1FBAC7-CE06-4867-ABB3-12EB095C488E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
