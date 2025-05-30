@@ -4,11 +4,12 @@ using System.IO;
 
 #if UNIX_IPC
 using System.Threading.Tasks;
+
 #else
 using System.IO.Pipes;
 #endif
 
-var pipeName = "demo_ipc";
+const string pipeName = "demo_ipc";
 
 #if UNIX_IPC
 var temp = Path.GetTempPath();
@@ -33,7 +34,7 @@ if (!File.Exists(requestPipe))
     };
 
     serverProcess.Start();
-    
+
     // Wait for requestPipe to appear
     var timeout = TimeSpan.FromSeconds(5);
     var sw = Stopwatch.StartNew();

@@ -58,3 +58,7 @@ msbuild > /dev/null 2>&1 && mono ./bin/Debug/SwissPension.IpcPrototype.Library.e
 -   The Mono project uses old-style `.csproj` and targets `net48`.
 -   The .NET 8 project uses the modern SDK-style format.
 -   Communication between processes can be implemented using named pipes on Windows and Unix domain sockets on Linux.
+
+## Running on Windows
+
+If you're using Windows, you don't need Mono—just install .NET 8 and .NET Framework 4.8 using the Visual Studio 2022 Installer. Then open IpcPrototype.sln, set DemoServer as the startup project, and run it. The build and IPC communication will work out of the box, thanks to a PowerShell 7 script that ensures cross-platform compatibility without relying on Bash or legacy Windows PowerShell.
