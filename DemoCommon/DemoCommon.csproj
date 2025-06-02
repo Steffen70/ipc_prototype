@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>SwissPension.IpcPrototype.Common</AssemblyName>
+        <RootNamespace>$(AssemblyName)</RootNamespace>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <Target Name="ForceClean" AfterTargets="Clean">
+        <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
+    </Target>
+
+</Project>

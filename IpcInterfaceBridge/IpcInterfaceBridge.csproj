@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>SwissPension.IpcInterfaceBridge</AssemblyName>
+        <RootNamespace>$(AssemblyName)</RootNamespace>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    </ItemGroup>
+
+    <Target Name="ForceClean" AfterTargets="Clean">
+        <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
+    </Target>
+
+</Project>

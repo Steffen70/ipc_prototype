@@ -1,0 +1,46 @@
+﻿<Project ToolsVersion="15.0"
+    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <PropertyGroup>
+        <AssemblyName>SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix</AssemblyName>
+        <RootNamespace>$(AssemblyName)</RootNamespace>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net48</TargetFramework>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <OutputPath>bin/$(Configuration)/</OutputPath>
+    </PropertyGroup>
+
+    <Import Project="$(MSBuildToolsPath)/Microsoft.CSharp.targets"/>
+
+    <Target Name="ForceClean" AfterTargets="Clean">
+        <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
+    </Target>
+
+    <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
+        <DefineConstants>$(DefineConstants);UNIX_IPC</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup Condition=" '$(OS)' != 'Windows_NT' ">
+        <Reference Include="Mono.Posix"/>
+    </ItemGroup>
+
+    <Target Name="BuildIpcInterfaceBridge" AfterTargets="Clean">
+        <Exec Command='pwsh -NoProfile -File "$(MSBuildProjectDirectory)/../BuildDependency.ps1" -Configuration $(Configuration) -ProjectPath "../IpcInterfaceBridge/IpcInterfaceBridge.csproj" -Target "dotnet"'/>
+    </Target>
+
+    <ItemGroup>
+        <Reference Include="SwissPension.IpcInterfaceBridge">
+            <HintPath>../IpcInterfaceBridge/bin/$(Configuration)/netstandard2.0/SwissPension.IpcInterfaceBridge.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="UnixFifoTransport.cs" />
+    </ItemGroup>
+
+</Project>

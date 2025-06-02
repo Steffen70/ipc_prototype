@@ -17,12 +17,17 @@
         <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
     </Target>
 
-    <Target Name="BuildDemoLibrary" AfterTargets="Build">
-        <Exec Command='pwsh -NoProfile -File "$(MSBuildProjectDirectory)/BuildLibrary.ps1" -Configuration $(Configuration)'/>
+    <ItemGroup>
+        <ProjectReference Include="../DemoCommon/DemoCommon.csproj"/>
+        <ProjectReference Include="../IpcInterfaceBridge/IpcInterfaceBridge.csproj"/>
+    </ItemGroup>
+
+    <!-- <Target Name="BuildDemoLibrary" AfterTargets="Build">
+        <Exec Command='pwsh -NoProfile -File "$(MSBuildProjectDirectory)/../BuildDependency.ps1" -Configuration $(Configuration) -ProjectPath "../DemoLibrary/DemoLibrary.csproj"'/>
     </Target>
 
     <Target Name="CopyDemoLibraryExecutable" AfterTargets="Build">
         <Copy SourceFiles="$(MSBuildProjectDirectory)/../DemoLibrary/bin/$(Configuration)/SwissPension.IpcPrototype.Library.exe" DestinationFolder="$(OutputPath)"/>
-    </Target>
+    </Target> -->
 
 </Project>

@@ -1,5 +1,8 @@
 using System;
 using System.Threading;
+using SwissPension.IpcInterfaceBridge;
+using SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix;
+using SwissPension.IpcPrototype.Common;
 
 namespace SwissPension.IpcPrototype.Library
 {
@@ -8,7 +11,9 @@ namespace SwissPension.IpcPrototype.Library
         static void Main()
         {
             using var cts = new CancellationTokenSource();
-            using var server = new IpcServer("demo_ipc");
+            var transport = new UnixFifoTransport();
+            var demoLibrary = new DemoLibrary();
+            using var ipcHost = new IpcInterfaceHost<IDemoLibrary>(transport, demoLibrary);
 
             Console.CancelKeyPress += (_, e) =>
             {
@@ -16,10 +21,10 @@ namespace SwissPension.IpcPrototype.Library
                 Console.WriteLine("\nExiting...");
                 cts.Cancel();
                 cts.Dispose();
-                server.Dispose();
+                ipcHost.Dispose();
             };
 
-            server.RunLoop(cts.Token);
+            ipcHost.RunLoopAsync(cts.Token);
         }
     }
 }
