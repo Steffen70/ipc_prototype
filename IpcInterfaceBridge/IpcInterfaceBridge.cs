@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SwissPension.IpcInterfaceBridge.Extensions;
 using SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations;
 
 namespace SwissPension.IpcInterfaceBridge
@@ -37,28 +38,7 @@ namespace SwissPension.IpcInterfaceBridge
         protected void Initialize()
         {
             foreach (var method in typeof(TInterface).GetMethods())
-            {
-                var methodName = method.Name;
-                var parameters = method.GetParameters();
-                var returnType = method.ReturnType;
-                
-                var hashInput = $"{methodName}({string.Join(", ", parameters.Select(p => GetReadableName(p.ParameterType)))}): {GetReadableName(returnType)}";
-                var md5 = MD5.Create();
-                var hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(hashInput));
-                var hash = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
-
-                AddAction(hash, methodName, parameters.Select(p => p.ParameterType).ToArray(), returnType);
-            }
-        }
-
-        private static string GetReadableName(Type type)
-        {
-            if (!type.IsGenericType) return type.Name;
-            
-            var genericArguments = type.GetGenericArguments();
-            var genericName = string.Join(", ", genericArguments.Select(GetReadableName));
-            var genericType = type.Name.Substring(0, type.Name.IndexOf("`", StringComparison.Ordinal));
-            return $"{genericType}<{genericName}>";
+                AddAction(method.GetHash(), method.Name, method.GetParameters().Select(p => p.ParameterType).ToArray(), method.ReturnType);
         }
 
         protected virtual void AddAction(string key, string methodName, Type[] parameterTypes, Type returnType)
@@ -91,9 +71,9 @@ namespace SwissPension.IpcInterfaceBridge
 
                 var fromResultMethod = typeof(Task)
                     .GetMethod(nameof(Task.FromResult));
-                
+
                 Debug.Assert(fromResultMethod != null);
-                
+
                 // Create Task.FromResult<T>(deserialized) and cast to TReturnType
                 var taskFromResult = fromResultMethod
                     .MakeGenericMethod(innerType)
