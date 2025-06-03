@@ -39,8 +39,7 @@ sudo apt install mono-devel
 
 ```bash
 cd DemoServer
-dotnet run
-# Received: Hello from DemoLibrary
+dotnet run --framework net8.0
 ```
 
 ### .NET Framework (Mono) Project
@@ -49,16 +48,15 @@ dotnet run
 
 ```bash
 cd DemoLibrary
-msbuild > /dev/null 2>&1 && mono ./bin/Debug/SwissPension.IpcPrototype.Library.exe
-# Waiting for IPC client...
+msbuild /t:rebuild > /dev/null 2>&1 && mono ./bin/Debug/SwissPension.IpcPrototype.Library.exe
 ```
-
-## Notes
-
--   The Mono project uses old-style `.csproj` and targets `net48`.
--   The .NET 8 project uses the modern SDK-style format.
--   Communication between processes can be implemented using named pipes on Windows and Unix domain sockets on Linux.
 
 ## Running on Windows
 
-If you're using Windows, you don't need Mono—just install .NET 8 and .NET Framework 4.8 using the Visual Studio 2022 Installer. Then open IpcPrototype.sln, set DemoServer as the startup project, and run it. The build and IPC communication will work out of the box, thanks to a PowerShell 7 script that ensures cross-platform compatibility without relying on Bash or legacy Windows PowerShell.
+If you're using Windows, you don't need Mono—just install .NET 8 and .NET Framework 4.8 using the Visual Studio 2022 Installer. Then open IpcPrototype.sln, set DemoLibrary and DemoServer as the startup projects, and run them simultaneously.
+
+## TODO
+
+### Pipe Lock Bottlenecks
+
+The current implementation uses a per-pipe `SemaphoreSlim` to serialize read and write operations, ensuring safe concurrent access. While this approach is simple and effective for low-volume or single-client scenarios, it risks becoming a performance bottleneck under high-throughput or multi-client conditions. In the future, this should be replaced with a more scalable solution—such as a pipe pool or connection queue—that allows multiple concurrent server-side readers and writers. Each handler could operate independently using a dedicated instance or ephemeral pipe name, enabling better parallelism and responsiveness in high-load environments.
