@@ -18,16 +18,18 @@ namespace SwissPension.IpcInterfaceBridge
 
         public IpcInterfaceBridge()
         {
+            var isIpcClient = GetType() == typeof(IpcInterfaceBridge<TInterface>);
+            
 #if UNIX_IPC
             Transport = new UnixFifoTransport();
 #else
-            Transport = new NamedPipeTransport();
+            Transport = new NamedPipeTransport(!isIpcClient);
 #endif
 
             // Do not call Initialize() during base class construction if the current instance is a derived type.
             // This avoids calling potentially overridden virtual methods before the derived constructor has run.
             // The derived class is responsible for calling Initialize() manually after its own fields are initialized.
-            if (GetType() == typeof(IpcInterfaceBridge<TInterface>))
+            if (isIpcClient)
                 Initialize();
         }
 
