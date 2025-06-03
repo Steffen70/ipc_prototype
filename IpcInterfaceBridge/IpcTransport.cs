@@ -20,7 +20,18 @@ namespace SwissPension.IpcInterfaceBridge
             await semaphore.WaitAsync(token);
             try
             {
-                return await _ReadAsync(pipePath, token);
+                var readTask = _ReadAsync(pipePath, token);
+                    var completedTask = await Task.WhenAny(readTask, Task.Delay(Timeout.Infinite, token));
+
+                if (completedTask == readTask)
+                    // Already completed
+                    return await readTask;
+
+                // Timeout or cancellation
+                token.ThrowIfCancellationRequested();
+
+                // This line is technically unreachable, but needed to satisfy the compiler
+                return null;
             }
             catch (Exception) when (token.IsCancellationRequested)
             {

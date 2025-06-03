@@ -29,18 +29,7 @@ namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations
             {
                 using (var reader = new StreamReader(stream))
                 {
-                    var readTask = reader.ReadLineAsync();
-                    var completedTask = await Task.WhenAny(readTask, Task.Delay(Timeout.Infinite, token));
-
-                    if (completedTask == readTask)
-                        // Already completed
-                        return await readTask;
-
-                    // Timeout or cancellation
-                    token.ThrowIfCancellationRequested();
-
-                    // This line is technically unreachable, but needed to satisfy the compiler
-                    return null;
+                    return await reader.ReadLineAsync();
                 }
             }
         }
