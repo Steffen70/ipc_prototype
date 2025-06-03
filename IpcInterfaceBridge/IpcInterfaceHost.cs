@@ -36,12 +36,6 @@ namespace SwissPension.IpcInterfaceBridge
             AvailableFunctions[key] = args => method.Invoke(_instance, args);
         }
 
-        public async Task<TReturnType> InvokeMethodAsync<TReturnType>(string hash, object[] parameters)
-        {
-            var result = await ExecuteFunctionAsync(hash, parameters);
-            return (TReturnType)result;
-        }
-
         public async Task RunLoopAsync(CancellationToken token)
         {
             var (requestPipe, responsePipe) = Transport.GetPipePaths(PipeName);
