@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SwissPension.IpcInterfaceBridge.Extensions;
 using SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations;
+#if UNIX_IPC
+using System.Runtime.InteropServices;
+#endif
 
 namespace SwissPension.IpcInterfaceBridge
 {
@@ -21,7 +24,8 @@ namespace SwissPension.IpcInterfaceBridge
             var isIpcClient = GetType() == typeof(IpcInterfaceBridge<TInterface>);
             
 #if UNIX_IPC
-            Transport = new UnixFifoTransport();
+            var isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            Transport = IpcTransport.IsRunningOnMono || (isLinux && isIpcClient) ? (IpcTransport)new UnixFifoTransport() : new NamedPipeTransport(!isIpcClient);
 #else
             Transport = new NamedPipeTransport(!isIpcClient);
 #endif
