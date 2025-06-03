@@ -14,17 +14,9 @@ namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix
 
             Cleanup(pipePath);
 
-            try
-            {
 #if UNIX_IPC
-                Syscall.mkfifo(pipePath, FilePermissions.S_IRWXU);
+            Syscall.mkfifo(pipePath, FilePermissions.S_IRWXU);
 #endif
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to call mkfifo via reflection: {ex}");
-                throw;
-            }
         }
     }
 }
