@@ -18,14 +18,12 @@ namespace SwissPension.IpcPrototype.Library
                 {
                     if (ipcHost.Transport is UnixFifoTransport)
                         ipcHost.Transport = new IpcInterfaceBridge.PlatformSpecificImplementations.Unix.UnixFifoTransport();
-                    
+
                     Console.CancelKeyPress += (_, e) =>
                     {
                         e.Cancel = true;
                         Console.WriteLine("Exiting...");
                         cts.Cancel();
-                        ipcHost.Dispose();
-                        cts.Dispose();
                     };
 
                     ipcHost.RunLoopAsync(cts.Token).GetAwaiter().GetResult();

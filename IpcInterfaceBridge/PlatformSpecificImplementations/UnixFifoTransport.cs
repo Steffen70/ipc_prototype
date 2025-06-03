@@ -12,10 +12,10 @@ namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations
             var temp = Path.GetTempPath();
             var requestPipe = Path.Combine(temp, $"{pipeName}_in");
             var responsePipe = Path.Combine(temp, $"{pipeName}_out");
-            
+
             return (requestPipe, responsePipe);
         }
-        
+
         public override void EnsureCreated(string pipePath) => throw new NotImplementedException("UnixFifoTransport.EnsureCreated is implemented in a separate platform-specific assembly.");
 
         public override void Cleanup(string pipePath)
@@ -25,11 +25,22 @@ namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations
 
         protected override async Task<string> _ReadAsync(string pipePath, CancellationToken token = default)
         {
-            using (var stream = new FileStream(pipePath, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(pipePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
                 using (var reader = new StreamReader(stream))
                 {
-                    return await reader.ReadLineAsync();
+                    var readTask = reader.ReadLineAsync();
+                    var completedTask = await Task.WhenAny(readTask, Task.Delay(Timeout.Infinite, token));
+
+                    if (completedTask == readTask)
+                        // Already completed
+                        return await readTask;
+
+                    // Timeout or cancellation
+                    token.ThrowIfCancellationRequested();
+
+                    // This line is technically unreachable, but needed to satisfy the compiler
+                    return null;
                 }
             }
         }

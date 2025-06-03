@@ -22,6 +22,11 @@ namespace SwissPension.IpcInterfaceBridge
             {
                 return await _ReadAsync(pipePath, token);
             }
+            catch (Exception) when (token.IsCancellationRequested)
+            {
+                // Safe to ignore pipe errors during cancellation
+                return null;
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error reading from pipe: {ex.Message}");

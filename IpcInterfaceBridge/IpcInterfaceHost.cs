@@ -41,10 +41,14 @@ namespace SwissPension.IpcInterfaceBridge
             var (requestPipe, responsePipe) = Transport.GetPipePaths(PipeName);
             Transport.EnsureCreated(requestPipe);
             Transport.EnsureCreated(responsePipe);
-            
+
             while (!token.IsCancellationRequested)
             {
                 var json = await Transport.ReadAsync(requestPipe, token);
+
+                if (token.IsCancellationRequested)
+                    break;
+
                 var call = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
 
                 var hash = call["Hash"].ToString();

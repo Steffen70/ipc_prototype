@@ -3,8 +3,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SwissPension.IpcInterfaceBridge.Extensions;
@@ -14,11 +12,9 @@ namespace SwissPension.IpcInterfaceBridge
 {
     public class IpcInterfaceBridge<TInterface>
     {
-        public IpcTransport Transport { get; set; }
+        protected readonly ConcurrentDictionary<string, Func<object[], object>> AvailableFunctions = new ConcurrentDictionary<string, Func<object[], object>>();
 
         protected readonly string PipeName = typeof(TInterface).Name;
-
-        protected readonly ConcurrentDictionary<string, Func<object[], object>> AvailableFunctions = new ConcurrentDictionary<string, Func<object[], object>>();
 
         public IpcInterfaceBridge()
         {
@@ -34,6 +30,8 @@ namespace SwissPension.IpcInterfaceBridge
             if (GetType() == typeof(IpcInterfaceBridge<TInterface>))
                 Initialize();
         }
+
+        public IpcTransport Transport { get; set; }
 
         protected void Initialize()
         {

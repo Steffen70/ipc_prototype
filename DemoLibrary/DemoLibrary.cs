@@ -9,13 +9,13 @@ namespace SwissPension.IpcPrototype.Library
         public string SayHello(string name) => $"Hello, {name}!";
         public long Add(long a, long b) => a + b;
 
-        public TestClass CreateTestClass() => new TestClass()
+        public TestClass CreateTestClass() => new TestClass
         {
             Name = "Steffen70",
             Age = 24
         };
 
-        public NestedTestClass CreateNestedTestClass() => new NestedTestClass()
+        public NestedTestClass CreateNestedTestClass() => new NestedTestClass
         {
             GroupName = "Developers",
             TestClass = CreateTestClass()

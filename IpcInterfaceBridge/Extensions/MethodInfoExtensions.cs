@@ -17,11 +17,11 @@ namespace SwissPension.IpcInterfaceBridge.Extensions
 
             return hash;
         }
-        
+
         private static string GetReadableName(Type type)
         {
             if (!type.IsGenericType) return type.Name;
-            
+
             var genericArguments = type.GetGenericArguments();
             var genericName = string.Join(", ", genericArguments.Select(GetReadableName));
             var genericType = type.Name.Substring(0, type.Name.IndexOf("`", StringComparison.Ordinal));
