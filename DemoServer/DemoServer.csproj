@@ -3,31 +3,19 @@
     <PropertyGroup>
         <AssemblyName>SwissPension.IpcPrototype.Server</AssemblyName>
         <RootNamespace>$(AssemblyName)</RootNamespace>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Exe</OutputType>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
-        <DefineConstants>$(DefineConstants);UNIX_IPC</DefineConstants>
+        <LangVersion>7.3</LangVersion>
+        <TargetFrameworks>net8.0</TargetFrameworks>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <Target Name="ForceClean" AfterTargets="Clean">
-        <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
+        <RemoveDir Directories="$(MSBuildProjectDirectory)\bin"/>
     </Target>
 
     <ItemGroup>
-        <ProjectReference Include="../DemoCommon/DemoCommon.csproj"/>
-        <ProjectReference Include="../IpcInterfaceBridge/IpcInterfaceBridge.csproj"/>
+        <ProjectReference Include="..\DemoCommon\DemoCommon.csproj"/>
+        <ProjectReference Include="..\IpcInterfaceBridge\IpcInterfaceBridge.csproj"/>
     </ItemGroup>
-
-    <!-- <Target Name="BuildDemoLibrary" AfterTargets="Build">
-        <Exec Command='pwsh -NoProfile -File "$(MSBuildProjectDirectory)/../BuildDependency.ps1" -Configuration $(Configuration) -ProjectPath "../DemoLibrary/DemoLibrary.csproj"'/>
-    </Target>
-
-    <Target Name="CopyDemoLibraryExecutable" AfterTargets="Build">
-        <Copy SourceFiles="$(MSBuildProjectDirectory)/../DemoLibrary/bin/$(Configuration)/SwissPension.IpcPrototype.Library.exe" DestinationFolder="$(OutputPath)"/>
-    </Target> -->
 
 </Project>

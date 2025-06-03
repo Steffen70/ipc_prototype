@@ -1,30 +1,36 @@
 using System;
 using System.Threading;
 using SwissPension.IpcInterfaceBridge;
-using SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix;
+using SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations;
 using SwissPension.IpcPrototype.Common;
 
 namespace SwissPension.IpcPrototype.Library
 {
-    static class Program
+    internal static class Program
     {
-        static void Main()
+        private static void Main()
         {
-            using var cts = new CancellationTokenSource();
-            var transport = new UnixFifoTransport();
-            var demoLibrary = new DemoLibrary();
-            using var ipcHost = new IpcInterfaceHost<IDemoLibrary>(transport, demoLibrary);
-
-            Console.CancelKeyPress += (_, e) =>
+            using (var cts = new CancellationTokenSource())
             {
-                e.Cancel = true;
-                Console.WriteLine("\nExiting...");
-                cts.Cancel();
-                cts.Dispose();
-                ipcHost.Dispose();
-            };
+                var demoLibrary = new DemoLibrary();
 
-            ipcHost.RunLoopAsync(cts.Token);
+                using (var ipcHost = new IpcInterfaceHost<IDemoLibrary>(demoLibrary))
+                {
+                    if (ipcHost.Transport is UnixFifoTransport)
+                        ipcHost.Transport = new IpcInterfaceBridge.PlatformSpecificImplementations.Unix.UnixFifoTransport();
+                    
+                    Console.CancelKeyPress += (_, e) =>
+                    {
+                        e.Cancel = true;
+                        Console.WriteLine("Exiting...");
+                        cts.Cancel();
+                        ipcHost.Dispose();
+                        cts.Dispose();
+                    };
+
+                    ipcHost.RunLoopAsync(cts.Token).GetAwaiter().GetResult();
+                }
+            }
         }
     }
 }

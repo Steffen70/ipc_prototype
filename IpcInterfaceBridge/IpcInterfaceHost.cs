@@ -1,60 +1,67 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace SwissPension.IpcInterfaceBridge;
-
-public class IpcInterfaceHost<TInterface> : IpcInterfaceBridge<TInterface>, IDisposable
+namespace SwissPension.IpcInterfaceBridge
 {
-    private readonly TInterface _instance;
-
-    public IpcInterfaceHost(IIpcTransport transport, TInterface instance) : base(transport)
+    public class IpcInterfaceHost<TInterface> : IpcInterfaceBridge<TInterface>, IDisposable
     {
-        _instance = instance;
-        Transport.EnsureCreated(RequestPipe);
-        Transport.EnsureCreated(ResponsePipe);
-        
-        Initialize();
-    }
+        private readonly TInterface _instance;
 
-    public void Dispose()
-    {
-        Transport.Cleanup(RequestPipe);
-        Transport.Cleanup(ResponsePipe);
-    }
-
-    protected override void AddAction(string key, string methodName, Type[] parameterTypes, Type returnType)
-    {
-        Console.WriteLine($"Adding action: {key} - {methodName}");
-        
-        var method = typeof(TInterface).GetMethod(methodName, parameterTypes);
-        AvailableFunctions[key] = args => method!.Invoke(_instance, args);
-    }
-
-    public Task<TReturnType> InvokeMethodAsync<TReturnType>(string hash, object[] parameters)
-    {
-        var result = ExecuteFunction(hash, parameters);
-        return Task.FromResult((TReturnType)result);
-    }
-
-    public async void RunLoopAsync(CancellationToken token)
-    {
-        while (!token.IsCancellationRequested)
+        public IpcInterfaceHost(TInterface instance)
         {
-            var json = await Transport.ReadAsync(RequestPipe, token);
-            var call = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+            _instance = instance;
+            Initialize();
+        }
 
-            var hash = call["Hash"].ToString();
-            var jArray = (JArray)call["Params"];
-            var parameters = jArray.ToObject<object[]>();
+        public void Dispose()
+        {
+            var (requestPipe, responsePipe) = Transport.GetPipePaths(PipeName);
+            Transport.Cleanup(requestPipe);
+            Transport.Cleanup(responsePipe);
+        }
 
-            var result = ExecuteFunction(hash, parameters);
-            var resultJson = JsonConvert.SerializeObject(result);
+        protected override void AddAction(string key, string methodName, Type[] parameterTypes, Type returnType)
+        {
+            Console.WriteLine($"Adding action: {key} - {methodName}");
 
-            await Transport.WriteAsync(ResponsePipe, resultJson, token);
+            var method = typeof(TInterface).GetMethod(methodName, parameterTypes);
+
+            Debug.Assert(method != null);
+
+            AvailableFunctions[key] = args => method.Invoke(_instance, args);
+        }
+
+        public async Task<TReturnType> InvokeMethodAsync<TReturnType>(string hash, object[] parameters)
+        {
+            var result = await ExecuteFunctionAsync(hash, parameters);
+            return (TReturnType)result;
+        }
+
+        public async Task RunLoopAsync(CancellationToken token)
+        {
+            var (requestPipe, responsePipe) = Transport.GetPipePaths(PipeName);
+            Transport.EnsureCreated(requestPipe);
+            Transport.EnsureCreated(responsePipe);
+            
+            while (!token.IsCancellationRequested)
+            {
+                var json = await Transport.ReadAsync(requestPipe, token);
+                var call = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+
+                var hash = call["Hash"].ToString();
+                var jArray = (JArray)call["Params"];
+                var parameters = jArray.ToObject<object[]>();
+
+                var result = await ExecuteFunctionAsync(hash, parameters);
+                var resultJson = result == null ? string.Empty : JsonConvert.SerializeObject(result);
+
+                await Transport.WriteAsync(responsePipe, resultJson, token);
+            }
         }
     }
 }

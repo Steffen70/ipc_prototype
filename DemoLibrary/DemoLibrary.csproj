@@ -1,60 +1,22 @@
-﻿<Project ToolsVersion="15.0"
-    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <AssemblyName>SwissPension.IpcPrototype.Library</AssemblyName>
         <RootNamespace>$(AssemblyName)</RootNamespace>
-        <OutputType>Exe</OutputType>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <LangVersion>7.3</LangVersion>
         <TargetFramework>net48</TargetFramework>
-        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-        <LangVersion>latest</LangVersion>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
-
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <OutputPath>bin/$(Configuration)/</OutputPath>
-    </PropertyGroup>
-
-    <Import Project="$(MSBuildToolsPath)/Microsoft.CSharp.targets"/>
 
     <Target Name="ForceClean" AfterTargets="Clean">
-        <RemoveDir Directories="$(MSBuildProjectDirectory)/bin"/>
-    </Target>
-
-    <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
-        <DefineConstants>$(DefineConstants);UNIX_IPC</DefineConstants>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    </ItemGroup>
-
-    <Target Name="BuildDemoCommon" AfterTargets="Clean">
-        <Exec Command='pwsh -NoProfile -File "$(MSBuildProjectDirectory)/../BuildDependency.ps1" -Configuration $(Configuration) -ProjectPath "../DemoCommon/DemoCommon.csproj" -Target "dotnet"'/>
-    </Target>
-
-    <Target Name="BuildIpcInterfaceBridge" AfterTargets="Clean" Condition=" '$(OS)' != 'Windows_NT' ">
-        <Exec Command='pwsh -NoProfile -File "$(MSBuildProjectDirectory)/../BuildDependency.ps1" -Configuration $(Configuration) -ProjectPath "../IpcInterfaceBridge.Unix/IpcInterfaceBridge.Unix.csproj"'/>
+        <RemoveDir Directories="$(MSBuildProjectDirectory)\bin"/>
     </Target>
 
     <ItemGroup>
-        <Reference Include="SwissPension.IpcPrototype.Common">
-            <HintPath>../DemoCommon/bin/$(Configuration)/netstandard2.0/SwissPension.IpcPrototype.Common.dll</HintPath>
-        </Reference>
-        <Reference Include="SwissPension.IpcInterfaceBridge">
-            <HintPath>../IpcInterfaceBridge.Unix/bin/$(Configuration)/SwissPension.IpcInterfaceBridge.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup Condition=" '$(OS)' != 'Windows_NT' ">
-        <Reference Include="SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix">
-            <HintPath>../IpcInterfaceBridge.Unix/bin/$(Configuration)/SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Include="Program.cs"/>
-        <Compile Include="DemoLibrary.cs" />
+        <ProjectReference Include="..\DemoCommon\DemoCommon.csproj"/>
+        <ProjectReference Include="..\IpcInterfaceBridge\IpcInterfaceBridge.csproj"/>
+        <ProjectReference Include="..\IpcInterfaceBridge.Unix\IpcInterfaceBridge.Unix.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -1,56 +1,46 @@
-using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations;
-
-public class NamedPipeTransport : IIpcTransport
+namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations
 {
-    private static readonly ConcurrentDictionary<string, SemaphoreSlim> PipeLocks = new();
-
-    public void EnsureCreated(string pipePath)
+    public class NamedPipeTransport : IpcTransport
     {
-        // nothing needed for named pipes
-    }
+        public override (string requestPipe, string responsePipe) GetPipePaths(string pipeName) => ($"{pipeName}_in", $"{pipeName}_out");
 
-    public void Cleanup(string pipePath)
-    {
-        // nothing needed for named pipes
-    }
-
-    public async Task<string> ReadAsync(string pipeName, CancellationToken token = default)
-    {
-        var semaphore = PipeLocks.GetOrAdd(pipeName, _ => new(1, 1));
-        await semaphore.WaitAsync(token);
-        try
+        public override void EnsureCreated(string pipePath)
         {
-            using var pipe = new NamedPipeServerStream(pipeName, PipeDirection.In);
-            await pipe.WaitForConnectionAsync(token);
-            using var reader = new StreamReader(pipe);
-            return await reader.ReadToEndAsync();
+            // nothing needed for named pipes
         }
-        finally
-        {
-            semaphore.Release();
-        }
-    }
 
-    public async Task WriteAsync(string pipeName, string response, CancellationToken token = default)
-    {
-        var semaphore = PipeLocks.GetOrAdd(pipeName, _ => new(1, 1));
-        await semaphore.WaitAsync(token);
-        try
+        public override void Cleanup(string pipePath)
         {
-            using var pipe = new NamedPipeServerStream(pipeName, PipeDirection.Out);
-            await pipe.WaitForConnectionAsync(token);
-            using var writer = new StreamWriter(pipe) { AutoFlush = true };
-            await writer.WriteAsync(response);
+            // nothing needed for named pipes
         }
-        finally
+
+        protected override async Task<string> _ReadAsync(string pipeName, CancellationToken token = default)
         {
-            semaphore.Release();
+            using (var pipe = new NamedPipeServerStream(pipeName, PipeDirection.In))
+            {
+                await pipe.WaitForConnectionAsync(token);
+                using (var reader = new StreamReader(pipe))
+                {
+                    return await reader.ReadLineAsync();
+                }
+            }
+        }
+
+        protected override async Task _WriteAsync(string pipeName, string response, CancellationToken token = default)
+        {
+            using (var pipe = new NamedPipeServerStream(pipeName, PipeDirection.Out))
+            {
+                await pipe.WaitForConnectionAsync(token);
+                using (var writer = new StreamWriter(pipe) { AutoFlush = true })
+                {
+                    await writer.WriteLineAsync(response);
+                }
+            }
         }
     }
 }

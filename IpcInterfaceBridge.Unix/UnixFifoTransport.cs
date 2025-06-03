@@ -1,8 +1,6 @@
-using System.IO;
-using Mono.Unix.Native;
-
-#if !UNIX_IPC
 using System;
+#if UNIX_IPC
+using Mono.Unix.Native;
 #endif
 
 namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix
@@ -11,12 +9,22 @@ namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix
     {
         public override void EnsureCreated(string pipePath)
         {
+            if (!IsRunningOnMono)
+                throw new PlatformNotSupportedException("UnixFifoTransport is only supported on Mono.");
+
+            Cleanup(pipePath);
+
+            try
+            {
 #if UNIX_IPC
-            if (File.Exists(pipePath)) File.Delete(pipePath);
-            Syscall.mkfifo(pipePath, FilePermissions.S_IRWXU);
-#else
-            throw new PlatformNotSupportedException("UnixFifiTransport is intended to run on Unix systems. Build this project on a Unix system with Mono.");
+                Syscall.mkfifo(pipePath, FilePermissions.S_IRWXU);
 #endif
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to call mkfifo via reflection: {ex}");
+                throw;
+            }
         }
     }
 }

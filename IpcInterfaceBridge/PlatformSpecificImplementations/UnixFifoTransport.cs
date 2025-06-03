@@ -1,66 +1,48 @@
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations;
-
-public class UnixFifoTransport : IIpcTransport
+namespace SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations
 {
-    private static readonly ConcurrentDictionary<string, SemaphoreSlim> PipeLocks = new();
-
-    /// <summary>
-    ///     Ensures that the FIFO pipe is created on Unix-based systems.
-    ///     This method must be implemented in a .NET Framework–targeted project with a reference to Mono.Posix,
-    ///     as .NET Standard does not support native syscall bindings like mkfifo.
-    /// </summary>
-    public virtual void EnsureCreated(string pipePath) => throw new NotImplementedException("EnsureCreated is implemented in the Unix specific SwissPension.IpcInterfaceBridge.PlatformSpecificImplementations.Unix.dll assembly.");
-
-    public void Cleanup(string pipePath)
+    public class UnixFifoTransport : IpcTransport
     {
-        if (File.Exists(pipePath)) File.Delete(pipePath);
-    }
+        public override (string requestPipe, string responsePipe) GetPipePaths(string pipeName)
+        {
+            var temp = Path.GetTempPath();
+            var requestPipe = Path.Combine(temp, $"{pipeName}_in");
+            var responsePipe = Path.Combine(temp, $"{pipeName}_out");
+            
+            return (requestPipe, responsePipe);
+        }
+        
+        public override void EnsureCreated(string pipePath) => throw new NotImplementedException("UnixFifoTransport.EnsureCreated is implemented in a separate platform-specific assembly.");
 
-    public async Task<string> ReadAsync(string pipePath, CancellationToken token = default)
-    {
-        var semaphore = PipeLocks.GetOrAdd(pipePath, _ => new(1, 1));
-        await semaphore.WaitAsync(token);
-        try
+        public override void Cleanup(string pipePath)
         {
-            using var stream = new FileStream(pipePath, FileMode.Open, FileAccess.Read);
-            using var reader = new StreamReader(stream);
-            return await reader.ReadToEndAsync();
+            if (File.Exists(pipePath)) File.Delete(pipePath);
         }
-        catch (Exception e)
-        {
-            Console.WriteLine($"Error reading from pipe: {e.Message}");
-            throw;
-        }
-        finally
-        {
-            semaphore.Release();
-        }
-    }
 
-    public async Task WriteAsync(string pipePath, string response, CancellationToken token = default)
-    {
-        var semaphore = PipeLocks.GetOrAdd(pipePath, _ => new(1, 1));
-        await semaphore.WaitAsync(token);
-        try
+        protected override async Task<string> _ReadAsync(string pipePath, CancellationToken token = default)
         {
-            using var stream = new FileStream(pipePath, FileMode.Open, FileAccess.Write);
-            using var writer = new StreamWriter(stream) { AutoFlush = true };
-            await writer.WriteAsync(response);
+            using (var stream = new FileStream(pipePath, FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    return await reader.ReadLineAsync();
+                }
+            }
         }
-        catch (Exception e)
+
+        protected override async Task _WriteAsync(string pipePath, string response, CancellationToken token = default)
         {
-            Console.WriteLine($"Error writing to pipe: {e.Message}");
-            throw;
-        }
-        finally
-        {
-            semaphore.Release();
+            using (var stream = new FileStream(pipePath, FileMode.Open, FileAccess.Write))
+            {
+                using (var writer = new StreamWriter(stream) { AutoFlush = true })
+                {
+                    await writer.WriteLineAsync(response);
+                }
+            }
         }
     }
 }
