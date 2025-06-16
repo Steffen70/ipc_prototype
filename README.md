@@ -44,11 +44,10 @@ dotnet run --framework net8.0
 
 ### .NET Framework (Mono) Project
 
-**Note:** You don't need to run the Mono service seperatly, the `DemoServer` will automatically start `DemoLibrary` when it starts.
-
 ```bash
 cd DemoLibrary
-msbuild /t:rebuild > /dev/null 2>&1 && mono ./bin/Debug/SwissPension.IpcPrototype.Library.exe
+msbuild /t:rebuild
+mono ./bin/Debug/net48/SwissPension.IpcPrototype.Library.exe
 ```
 
 ## Running on Windows
